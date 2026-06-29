@@ -1,7 +1,8 @@
 services:
   - type: web
-    name: ipquality
+    name: ip
     runtime: docker
+    plan: free
     dockerfilePath: ./Dockerfile
     envVars:
       - key: IPQUALITY_ARGS
