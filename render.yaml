@@ -6,6 +6,6 @@ services:
     dockerfilePath: ./Dockerfile
     envVars:
       - key: IPQUALITY_ARGS
-        value: "-p -j"
+        value: "-p -j -4"
       - key: IPQUALITY_TIMEOUT
         value: "240"

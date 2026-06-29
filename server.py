@@ -18,7 +18,7 @@ STATUS_FILE = OUT_DIR / "status.json"
 RESULT_FILE = OUT_DIR / "result.json"
 LOG_FILE = OUT_DIR / "run.log"
 
-SCRIPT_ARGS = os.environ.get("IPQUALITY_ARGS", "-p -j")
+SCRIPT_ARGS = os.environ.get("IPQUALITY_ARGS", "-p -j -4")
 RUN_TIMEOUT = int(os.environ.get("IPQUALITY_TIMEOUT", "240"))
 
 state_lock = threading.Lock()
@@ -64,7 +64,15 @@ def run_check():
         LOG_FILE.write_text(completed.stdout, encoding="utf-8", errors="replace")
 
         if completed.returncode != 0:
-            raise RuntimeError(f"ip.sh exited with code {completed.returncode}")
+            message = f"ip.sh exited with code {completed.returncode}"
+            LOG_FILE.write_text(f"{message}\n\n{completed.stdout}", encoding="utf-8", errors="replace")
+            write_status(
+                "error",
+                started_at=started,
+                finished_at=time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+                error=message,
+            )
+            return
 
         output = completed.stdout.strip()
         parsed = json.loads(output)
