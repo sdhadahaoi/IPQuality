@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: ipquality
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: IPQUALITY_ARGS
+        value: "-p -j"
+      - key: IPQUALITY_TIMEOUT
+        value: "240"
