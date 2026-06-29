@@ -9,3 +9,5 @@ services:
         value: "-p -j -4"
       - key: IPQUALITY_TIMEOUT
         value: "240"
+      - key: TERM
+        value: "xterm"

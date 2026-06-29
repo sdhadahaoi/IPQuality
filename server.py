@@ -49,12 +49,20 @@ def run_check():
     global running
     started = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
     write_status("running", started_at=started)
-    cmd = ["bash", str(ROOT / "ip.sh"), *shlex.split(SCRIPT_ARGS)]
+    args = shlex.split(SCRIPT_ARGS)
+    if "-o" not in args:
+        args.extend(["-o", str(RESULT_FILE)])
+    if RESULT_FILE.exists():
+        RESULT_FILE.unlink()
+    cmd = ["bash", str(ROOT / "ip.sh"), *args]
+    env = os.environ.copy()
+    env.setdefault("TERM", "xterm")
 
     try:
         completed = subprocess.run(
             cmd,
             cwd=ROOT,
+            env=env,
             text=True,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
@@ -62,6 +70,12 @@ def run_check():
             check=False,
         )
         LOG_FILE.write_text(completed.stdout, encoding="utf-8", errors="replace")
+
+        if RESULT_FILE.exists():
+            parsed = json.loads(RESULT_FILE.read_text(encoding="utf-8"))
+            RESULT_FILE.write_text(json.dumps(parsed, ensure_ascii=False, indent=2), encoding="utf-8")
+            write_status("done", started_at=started, finished_at=time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()))
+            return
 
         if completed.returncode != 0:
             message = f"ip.sh exited with code {completed.returncode}"
